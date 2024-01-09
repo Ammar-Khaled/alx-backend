@@ -1,20 +1,11 @@
 #!/usr/bin/env python3
-"""5-app"""
-from flask import Flask, render_template, request, g
+"""Module that mocks the login"""
+
+
+from flask import Flask, request, render_template, g
 from flask_babel import Babel
-from typing import Optional
-
-
-class Config():
-    """Config class."""
-    LANGUAGES = ['en', 'fr']
-    BABEL_DEFAULT_LOCALE = 'en'
-    BABEL_DEFAULT_TIMEZONE = 'UTC'
-
-
-app = Flask(__name__)
-app.config.from_object('5-app.Config')
-babel = Babel(app)
+from os import getenv
+from typing import Union
 
 users = {
     1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
@@ -23,17 +14,45 @@ users = {
     4: {"name": "Teletubby", "locale": None, "timezone": "Europe/London"},
 }
 
+app = Flask(__name__)
+babel = Babel(app)
 
-def get_user() -> Optional[dict]:
-    """get user dict."""
+
+class Config(object):
+    """Babel configuration"""
+    LANGUAGES = ['en', 'fr']
+    BABEL_DEFAULT_LOCALE = 'en'
+    BABEL_DEFAULT_TIMEZONE = 'UTC'
+
+
+app.config.from_object('5-app.Config')
+
+
+@app.route('/', methods=['GET'], strict_slashes=False)
+def index() -> str:
+    """GET method for '/' route
+    Return: 5-index.html
+    """
+    return render_template('5-index.html')
+
+
+@babel.localeselector
+def get_locale() -> str:
+    """Determines the best match for supported languages"""
+    if request.args.get('locale'):
+        locale = request.args.get('locale')
+        if locale in app.config['LANGUAGES']:
+            return locale
+    else:
+        return request.accept_languages.best_match(app.config['LANGUAGES'])
+
+
+def get_user() -> Union[dict, None]:
+    """Method that returns the user dict if ID is found"""
     if request.args.get('login_as'):
-        try:
-            user_id = int(request.args.get('login_as'))
-        except Exception:
-            return None
-
-        return users.get(user_id)
-
+        user = int(request.args.get('login_as'))
+        if user in users:
+            return users.get(user)
     else:
         return None
 
@@ -45,20 +64,5 @@ def before_request():
     g.user = get_user()
 
 
-@babel.localeselector
-def get_locale() -> str:
-    """get_locale method for localeselector."""
-    if 'locale' in request.args and \
-       request.args['locale'] in app.config['LANGUAGES']:
-        return request.args['locale']
-    return request.accept_languages.best_match(app.config['LANGUAGES'])
-
-
-@app.route('/')
-def hello_world():
-    """Render hello world template."""
-    return render_template('5-index.html')
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run()
