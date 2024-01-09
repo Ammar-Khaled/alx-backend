@@ -25,10 +25,7 @@ def get_locale() -> str:
 @app.route('/')
 def hello_world():
     """Render hello world template."""
-    home_title = gettext('Welcome to Holberton')
-    home_header = gettext('Hello world!')
-    return render_template('3-index.html', home_title=home_title,
-                           home_header=home_header)
+    return render_template('3-index.html')
 
 
 if __name__ == '__main__':
