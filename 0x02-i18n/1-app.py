@@ -18,9 +18,9 @@ babel = Babel(app)
 
 @app.route('/')
 def hello_world():
+    """Render hello world template"""
     return render_template('1-index.html')
 
 
 if __name__ == '__main__':
-    print(app.config)
     app.run(host='0.0.0.0', port=5000)
