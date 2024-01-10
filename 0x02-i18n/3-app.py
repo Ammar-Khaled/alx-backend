@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """3-app"""
 from flask import Flask, render_template, request
-from flask_babel import Babel, gettext
+from flask_babel import Babel
 
 
 class Config():
